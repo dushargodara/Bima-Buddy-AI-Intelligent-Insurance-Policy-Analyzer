@@ -1,0 +1,50 @@
+{
+  "success": true,
+  "policy_summary": {
+    "simple_summary": "This is an endowment plan with a 25-year term. It offers guaranteed death benefit and maturity benefit. Returns are moderate and suitable for conservative investors.",
+    "policy_type": "endowment",
+    "guaranteed_return": true
+  },
+  "key_benefits": [
+    "Death benefit equal to sum assured",
+    "Guaranteed maturity benefit",
+    "Annual bonuses (if declared)",
+    "Tax benefits under Section 80C"
+  ],
+  "exclusions": [
+    "Suicide within first year",
+    "Pre-existing conditions during waiting period",
+    "Death due to hazardous activities"
+  ],
+  "hidden_clauses": [
+    "Bonus is not guaranteed and depends on company performance",
+    "Surrender value may be less than total premiums paid in early years"
+  ],
+  "policy_type_detected": "endowment",
+  "premium_details": {
+    "amount": 50000,
+    "frequency": "yearly"
+  },
+  "tenure_years": 25,
+  "total_investment": 1250000,
+  "maturity_value": 1500000,
+  "sum_assured": 1000000,
+  "net_profit": 250000,
+  "roi_percent": 20.0,
+  "cagr_percent": 0.93,
+  "inflation_adjusted_cagr": -4.77,
+  "guaranteed_vs_non_guaranteed": "Guaranteed",
+  "comparison": {
+    "fd_7pct_maturity": 6795700.0,
+    "mf_sip_12pct_projection": 6666670.0
+  },
+  "risk_score": 3,
+  "risk_level": "Low-Medium",
+  "risky_clauses": [
+    {
+      "keyword": "subject to",
+      "snippet": "Bonus payment is subject to company performance and market conditions."
+    }
+  ],
+  "recommendation": "Suitable for conservative investors seeking guaranteed returns with life cover. Not ideal for wealth creation - consider term insurance plus mutual funds for better long-term returns."
+}

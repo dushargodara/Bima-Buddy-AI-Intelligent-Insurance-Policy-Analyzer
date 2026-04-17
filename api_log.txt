@@ -1,0 +1,1 @@
+{"endpoints":["GET /health","POST /analyze","POST /diagnose"],"message":"BimaBuddy AI Backend API is running.","success":true}

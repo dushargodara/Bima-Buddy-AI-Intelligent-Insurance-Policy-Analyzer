@@ -1,0 +1,6 @@
+premium,payment_term,policy_term,total_investment,maturity_value,roi,claim_ratio,risk_label
+50000,20,25,1000000,1500000,50,98.5,low
+30000,15,20,450000,500000,11,92.0,medium
+70000,10,15,700000,600000,-14,85.0,high
+40000,20,25,800000,1200000,50,97.0,low
+25000,10,15,250000,260000,4,90.0,medium
