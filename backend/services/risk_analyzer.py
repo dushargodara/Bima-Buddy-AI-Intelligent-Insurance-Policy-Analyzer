@@ -8,7 +8,7 @@ import re
 from typing import Any, List, Dict
 
 from backend.services.clause_analyzer import detect_hidden_clauses
-from backend.core.logger import get_logger
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 

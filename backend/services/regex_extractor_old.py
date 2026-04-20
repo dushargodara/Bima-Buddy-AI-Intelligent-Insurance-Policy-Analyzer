@@ -7,7 +7,7 @@ Used as fallback when AI returns null for numeric fields.
 import re
 from typing import Any
 
-from backend.core.logger import get_logger
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 

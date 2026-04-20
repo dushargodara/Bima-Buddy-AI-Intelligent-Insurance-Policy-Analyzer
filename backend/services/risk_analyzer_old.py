@@ -8,7 +8,7 @@ import re
 from typing import Any
 
 from config import RISKY_KEYWORDS
-from backend.core.logger import get_logger
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 

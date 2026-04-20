@@ -6,8 +6,8 @@ Validates and corrects extracted financial values using AI.
 
 from typing import Dict, Any, Optional
 
-from backend.core.exceptions import AIAnalysisError
-from backend.core.logger import get_logger
+from backend.services.exceptions import AIAnalysisError
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 

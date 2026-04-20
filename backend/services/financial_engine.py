@@ -11,7 +11,7 @@ import numpy as np
 import numpy_financial as nf
 
 from config import DEFAULT_INFLATION_RATE, FD_RETURN_RATE, MF_SIP_RETURN_RATE
-from backend.core.logger import get_logger
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 

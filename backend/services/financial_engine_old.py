@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from config import DEFAULT_INFLATION_RATE, FD_RETURN_RATE, MF_SIP_RETURN_RATE
-from backend.core.logger import get_logger
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 

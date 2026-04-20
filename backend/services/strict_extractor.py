@@ -195,7 +195,7 @@ def extract_policy_data(file):
         """AI as validator, not primary extractor."""
         try:
             import google.generativeai as genai
-            from core.config import GEMINI_API_KEY
+            from config import GEMINI_API_KEY
             
             genai.configure(api_key=GEMINI_API_KEY)
             model = genai.GenerativeModel('gemini-pro')

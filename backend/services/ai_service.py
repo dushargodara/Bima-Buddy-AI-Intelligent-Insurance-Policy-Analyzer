@@ -10,8 +10,8 @@ import re
 from typing import Any
 
 from config import GEMINI_API_KEY, GEMINI_MAX_TOKENS, GEMINI_MODEL, PDF_MAX_CHARS_PER_CHUNK
-from backend.core.exceptions import AIAnalysisError
-from backend.core.logger import get_logger
+from backend.services.exceptions import AIAnalysisError
+from backend.services.logger import get_logger
 
 logger = get_logger(__name__)
 
