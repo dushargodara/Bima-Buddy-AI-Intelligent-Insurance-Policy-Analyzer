@@ -2,16 +2,16 @@ import os
 import requests
 import streamlit as st
 
+st.write("App started successfully")
+
 # ---------------------------------------------------------------------------
-# Backend API URL — set this in Streamlit Cloud Secrets as BACKEND_URL
-# Example: BACKEND_URL = "https://your-app.onrender.com"
-# Fallback: localhost for local development
+# Backend API URL — set BACKEND_URL in Streamlit Cloud Secrets.
+# Falls back to localhost for local development.
 # ---------------------------------------------------------------------------
-BACKEND_URL = (
-    os.environ.get("BACKEND_URL")
-    or (st.secrets.get("BACKEND_URL", "") if hasattr(st, "secrets") else "")
-    or "http://localhost:5000"
-)
+try:
+    BACKEND_URL = st.secrets["BACKEND_URL"]
+except Exception:
+    BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:5000")
 
 
 def call_analyze_api(uploaded_file) -> dict:
@@ -561,7 +561,7 @@ def main() -> None:
         )
 
         if st.button("🔍 Analyze Policy", use_container_width=True):
-            if not uploaded:
+            if uploaded is None:
                 st.warning("Please upload a PDF file first.")
                 return
 
