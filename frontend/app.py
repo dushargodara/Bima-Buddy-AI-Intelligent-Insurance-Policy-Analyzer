@@ -6,7 +6,21 @@ ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+import os
 import streamlit as st
+
+# ---------------------------------------------------------------------------
+# Secrets bootstrap: load GEMINI_API_KEY from st.secrets (Render / Streamlit
+# Cloud) if not already present in the environment (local .env via config.py).
+# ---------------------------------------------------------------------------
+if not os.environ.get("GEMINI_API_KEY"):
+    try:
+        key = st.secrets.get("GEMINI_API_KEY", "")
+        if key:
+            os.environ["GEMINI_API_KEY"] = key
+    except Exception:
+        pass  # st.secrets unavailable locally — that's fine, .env covers it
+
 from backend.pipeline import process_policy
 
 st.set_page_config(
