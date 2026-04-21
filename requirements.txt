@@ -1,22 +1,11 @@
-# BimaBuddy AI - Dependencies
-
-# Core logic
-python-dotenv>=1.0.0
-
-# PDF Processing
-pdfplumber>=0.10.0
-Pillow>=10.0.0
-
-# AI (Google Gemini)
-google-genai>=1.0.0
-pydantic>=2.0.0
-
-# Frontend
-streamlit>=1.28.0
-
-# Numerical / ML
-numpy>=1.24.0
-numpy-financial>=2.0.0
-pandas>=2.0.0
-scikit-learn>=1.3.0
-joblib>=1.3.0
+streamlit==1.32.0
+python-dotenv==1.0.1
+pdfplumber==0.10.4
+Pillow==10.3.0
+google-genai==1.9.0
+pydantic==2.7.1
+pandas==2.2.2
+numpy==1.26.4
+numpy-financial==1.0.0
+scikit-learn==1.4.2
+joblib==1.4.2
