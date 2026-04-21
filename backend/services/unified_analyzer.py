@@ -54,7 +54,7 @@ def unified_analyze(text: str) -> dict:
         - Return ONLY valid JSON.
         
         POLICY TEXT:
-        {clean_text[:3000]}
+        {clean_text[:6000]}
         """
 
         response = client.models.generate_content(

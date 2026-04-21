@@ -62,10 +62,12 @@ def extract_text_from_pdf(file):
                 except Exception as e:
                     print(f"Page {i+1} error:", e)
 
-            # PERFORMANCE FIX: Hard limit on text length
-            text = text.strip()[:3000]
-
-            print(f"TOTAL TEXT EXTRACTED (Limited to {max_pages} pages): {len(text)} chars")
+            # PERFORMANCE FIX: Smart limit on text length with prioritization
+            text = text.strip()
+            if len(text) > 6000:
+                text = prioritize_text(text, 6000)
+            
+            print(f"TOTAL TEXT EXTRACTED (Priority Mode, {max_pages} pages): {len(text)} chars")
 
             # =========================
             # OCR FALLBACK
@@ -128,7 +130,7 @@ def extract_text_with_ocr(file):
             except Exception as e:
                 print(f"OCR Page {i+1} error:", e)
 
-        text = text.strip()[:2000]
+        text = text.strip()[:4000]
         print("OCR TOTAL LENGTH (Limited to 1 page):", len(text))
 
         return text
@@ -136,6 +138,38 @@ def extract_text_with_ocr(file):
     except Exception as e:
         print("OCR ERROR:", e)
         return ""
+
+
+# =========================
+# SMART PRIORITIZATION
+# =========================
+def prioritize_text(text: str, limit: int = 6000) -> str:
+    """
+    Filters text to keep sections containing priority keywords.
+    Ensures AI always sees benefits, exclusions, and risks correctly.
+    """
+    keywords = ["benefit", "maturity", "death", "exclusion", "risk", "clause", "payment", "premium"]
+    lines = text.split('\n')
+    important_sections = []
+    other_sections = []
+    
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        if any(kw in line.lower() for kw in keywords):
+            important_sections.append(line)
+        else:
+            other_sections.append(line)
+            
+    # Combine: Important context first, then fill with the rest up to limit
+    result = "\n".join(important_sections)
+    if len(result) < limit:
+        remaining_budget = limit - len(result)
+        filler = "\n".join(other_sections)
+        result += "\n" + filler[:remaining_budget]
+        
+    return result[:limit]
 
 
 # =========================

@@ -212,7 +212,11 @@ def process_policy(file_obj) -> dict[str, Any]:
             return {"error": "Could not extract text from PDF"}
 
         if not is_insurance_policy(full_text):
-            return {"error": "The uploaded document does not appear to be an insurance policy. Please upload a valid insurance document."}
+            return {"error": "The uploaded document does not appear to be an insurance policy. Please upload a valid insurance policy PDF."}
+
+        # TASK 5: ENSURE AI ALWAYS GETS MEANINGFUL INPUT
+        if len(full_text) < 500:
+            return {"error": "Insufficient policy content extracted. Please ensure you are uploading a clear, text-readable PDF document."}
 
         # PERFORMANCE FIX: Start global timer
         start_time = time.time()
@@ -221,13 +225,13 @@ def process_policy(file_obj) -> dict[str, Any]:
         # Unified AI extraction (Consolidated Call)
         ai_data = unified_analyze(full_text)
         
-        # Performance check
-        if time.time() - start_time > 45:
+        # Performance check (Increased budget for better quality)
+        if time.time() - start_time > 90:
              # Fast exit for slow responses
              return {
                  "status": "partial",
-                 "policy_summary": {"simple_summary": "Analysis completed partially due to time limits."},
-                 "warnings": ["The document is being processed in high-speed mode. Some details might be simplified."]
+                 "policy_summary": {"simple_summary": "Analysis completed partially due to system limits and document complexity."},
+                 "warnings": ["The document is being processed in safe-mode. Analysis is limited to prevent system timeout."]
              }
 
         # Regex extraction (Safety net)
