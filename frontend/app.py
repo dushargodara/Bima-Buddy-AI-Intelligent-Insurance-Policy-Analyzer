@@ -1,27 +1,43 @@
-import sys
-from pathlib import Path
-
-# Add project root to path
-ROOT = Path(__file__).resolve().parent.parent
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
 import os
+import requests
 import streamlit as st
 
 # ---------------------------------------------------------------------------
-# Secrets bootstrap: load GEMINI_API_KEY from st.secrets (Render / Streamlit
-# Cloud) if not already present in the environment (local .env via config.py).
+# Backend API URL — set this in Streamlit Cloud Secrets as BACKEND_URL
+# Example: BACKEND_URL = "https://your-app.onrender.com"
+# Fallback: localhost for local development
 # ---------------------------------------------------------------------------
-if not os.environ.get("GEMINI_API_KEY"):
-    try:
-        key = st.secrets.get("GEMINI_API_KEY", "")
-        if key:
-            os.environ["GEMINI_API_KEY"] = key
-    except Exception:
-        pass  # st.secrets unavailable locally — that's fine, .env covers it
+BACKEND_URL = (
+    os.environ.get("BACKEND_URL")
+    or (st.secrets.get("BACKEND_URL", "") if hasattr(st, "secrets") else "")
+    or "http://localhost:5000"
+)
 
-from backend.pipeline import process_policy
+
+def call_analyze_api(uploaded_file) -> dict:
+    """Send PDF to the Flask backend and return the parsed result dict."""
+    try:
+        file_bytes = uploaded_file.getvalue()
+        response = requests.post(
+            f"{BACKEND_URL}/analyze",
+            files={"file": (uploaded_file.name, file_bytes, "application/pdf")},
+            timeout=120,
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+        if payload.get("status") == "success":
+            return payload["data"]
+        else:
+            return {"error": payload.get("message", "Unknown error from API")}
+
+    except requests.exceptions.ConnectionError:
+        return {"error": f"Could not connect to the backend API at {BACKEND_URL}. Is the Render service running?"}
+    except requests.exceptions.Timeout:
+        return {"error": "The backend took too long to respond (>120 s). Try a smaller or simpler PDF."}
+    except Exception as e:
+        return {"error": f"API call failed: {str(e)}"}
+
 
 st.set_page_config(
     page_title="BimaBuddy AI — Intelligent Insurance Analyzer",
@@ -549,10 +565,10 @@ def main() -> None:
                 st.warning("Please upload a PDF file first.")
                 return
 
-            with st.spinner("Analyzing your policy with Gemini AI… this may take 30–60 seconds."):
+            with st.spinner("Sending to BimaBuddy AI backend… this may take 30–60 seconds."):
                 try:
-                    result = process_policy(uploaded)
-                    
+                    result = call_analyze_api(uploaded)
+
                     if result is None:
                         st.error("Analysis failed to return result.")
                         return
@@ -562,7 +578,7 @@ def main() -> None:
                         return
 
                     st.session_state['analysis_result'] = result
-                    
+
                 except Exception as e:
                     import traceback
                     st.error(f"Unexpected error: {str(e)}")

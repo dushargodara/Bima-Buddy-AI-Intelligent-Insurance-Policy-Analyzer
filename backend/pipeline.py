@@ -391,6 +391,17 @@ def process_policy(file_obj) -> dict[str, Any]:
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
+def run_analysis(file_bytes: bytes) -> dict:
+    """
+    Entry point for the Flask API.
+    Accepts raw PDF bytes (from request.files['file'].read())
+    and delegates to process_policy().
+    """
+    import io
+    file_obj = io.BytesIO(file_bytes)
+    return process_policy(file_obj)
+
+
 if __name__ == "__main__":
     # Ensure model is trained on first run
     try: train_model()
