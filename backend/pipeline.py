@@ -13,7 +13,7 @@ from typing import Any
 
 # Services
 from backend.services.pdf_service import get_processed_text
-from backend.services.ai_extractor import ai_extract
+from backend.services.unified_analyzer import unified_analyze
 from backend.services.extraction_engine import extract_policy_data as engine_extract
 from backend.services.financial_engine import (
     calculate_cagr,
@@ -30,7 +30,6 @@ from backend.services.risk_analyzer import (
     detect_risky_clauses,
     get_risk_level,
 )
-from backend.services.text_analyzer import analyze_policy_text
 from backend.services.model import train_model, predict_risk
 from backend.services.logger import get_logger
 
@@ -215,10 +214,23 @@ def process_policy(file_obj) -> dict[str, Any]:
         if not is_insurance_policy(full_text):
             return {"error": "The uploaded document does not appear to be an insurance policy. Please upload a valid insurance document."}
 
+        # PERFORMANCE FIX: Start global timer
+        start_time = time.time()
+
         # Step 2: Extraction
-        # AI extraction
-        ai_data = ai_extract(full_text)
-        # Regex extraction
+        # Unified AI extraction (Consolidated Call)
+        ai_data = unified_analyze(full_text)
+        
+        # Performance check
+        if time.time() - start_time > 45:
+             # Fast exit for slow responses
+             return {
+                 "status": "partial",
+                 "policy_summary": {"simple_summary": "Analysis completed partially due to time limits."},
+                 "warnings": ["The document is being processed in high-speed mode. Some details might be simplified."]
+             }
+
+        # Regex extraction (Safety net)
         regex_data = engine_extract(full_text)
 
         # Smart merge
@@ -374,17 +386,14 @@ def process_policy(file_obj) -> dict[str, Any]:
             }
         }
 
-        # Text Analysis
-        try:
-            text_analysis = analyze_policy_text(full_text)
-            result.update({
-                "policy_summary": {"simple_summary": text_analysis.get("policy_summary", "")},
-                "key_benefits": text_analysis.get("key_benefits", []),
-                "exclusions": text_analysis.get("exclusions", []),
-                "hidden_clauses": text_analysis.get("hidden_clauses", []),
-                "risky_clauses": detect_risky_clauses(full_text),
-            })
-        except: pass
+        # Unified AI provides qualitative insights
+        result.update({
+            "policy_summary": {"simple_summary": ai_data.get("policy_summary", "Summary not available.")},
+            "key_benefits": ai_data.get("key_benefits", []),
+            "exclusions": ai_data.get("exclusions", []),
+            "hidden_clauses": ai_data.get("hidden_clauses", []),
+            "risky_clauses": detect_risky_clauses(full_text),
+        })
 
         return clean_json(result)
 

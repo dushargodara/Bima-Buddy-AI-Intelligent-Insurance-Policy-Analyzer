@@ -37,8 +37,12 @@ def extract_text_from_pdf(file):
             tables = []
 
             print(f"PDF OPENED: {len(pdf.pages)} pages found")
+            
+            # PERFORMANCE FIX: Limit to first 3 pages
+            max_pages = 3
+            pages_to_process = pdf.pages[:max_pages]
 
-            for i, page in enumerate(pdf.pages):
+            for i, page in enumerate(pages_to_process):
                 try:
                     page_text = page.extract_text()
 
@@ -48,18 +52,20 @@ def extract_text_from_pdf(file):
                     else:
                         print(f"Page {i+1}: No text")
 
-                    page_tables = page.extract_tables()
-                    if page_tables:
-                        tables.extend(page_tables)
-                        print(f"Page {i+1}: Found {len(page_tables)} tables")
+                    # Performance: Only extract tables from the first page (usually where numbers are)
+                    if i == 0:
+                        page_tables = page.extract_tables()
+                        if page_tables:
+                            tables.extend(page_tables)
+                            print(f"Page {i+1}: Found {len(page_tables)} tables")
 
                 except Exception as e:
                     print(f"Page {i+1} error:", e)
 
-            text = text.strip()
+            # PERFORMANCE FIX: Hard limit on text length
+            text = text.strip()[:3000]
 
-            print("TOTAL TEXT LENGTH:", len(text))
-            print("TOTAL TABLES:", len(tables))
+            print(f"TOTAL TEXT EXTRACTED (Limited to {max_pages} pages): {len(text)} chars")
 
             # =========================
             # OCR FALLBACK
@@ -106,7 +112,8 @@ def extract_text_with_ocr(file):
 
         print("OCR: Converting PDF → Images")
 
-        images = convert_from_path(file)
+        # PERFORMANCE FIX: Only OCR the very first page
+        images = convert_from_path(file, last_page=1)
 
         text = ""
 
@@ -121,8 +128,8 @@ def extract_text_with_ocr(file):
             except Exception as e:
                 print(f"OCR Page {i+1} error:", e)
 
-        text = text.strip()
-        print("OCR TOTAL LENGTH:", len(text))
+        text = text.strip()[:2000]
+        print("OCR TOTAL LENGTH (Limited to 1 page):", len(text))
 
         return text
 
