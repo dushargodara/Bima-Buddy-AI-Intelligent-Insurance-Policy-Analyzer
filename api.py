@@ -11,6 +11,7 @@ if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))
 
 import os
+import gc
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 
@@ -43,10 +44,24 @@ def analyze():
         return jsonify({"status": "error", "message": "Only PDF files are supported."}), 400
 
     try:
-        file_bytes = file.read()
+        # Task 1: Limit file size read and validate
+        # We read up to 5MB + 1 byte to check if it exceeds the limit
+        limit = 5 * 1024 * 1024
+        file_bytes = file.read(limit + 1)
 
+        if len(file_bytes) == 0:
+            return jsonify({"status": "error", "message": "The uploaded file is empty."}), 400
+
+        if len(file_bytes) > limit:
+            return jsonify({"status": "error", "message": "File too large. Maximum size is 5MB."}), 413
+
+        # Task 2 & 9: Robust error handling
         from backend.pipeline import run_analysis
         result = run_analysis(file_bytes)
+
+        # Clear large object from memory immediately
+        del file_bytes
+        gc.collect()
 
         if result is None:
             return jsonify({"status": "error", "message": "Analysis returned no result."}), 500
@@ -57,7 +72,11 @@ def analyze():
         return jsonify({"status": "success", "data": result})
 
     except Exception as e:
-        return jsonify({"status": "error", "message": str(e)}), 500
+        print(f"CRITICAL BACKEND ERROR: {str(e)}")
+        return jsonify({"status": "error", "message": f"Internal Server Error: {str(e)}"}), 500
+    finally:
+        # Final cleanup for the request
+        gc.collect()
 
 
 # ---------------------------------------------------------------------------

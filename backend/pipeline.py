@@ -5,6 +5,7 @@ This allows direct integration with Streamlit without requiring a separate Flask
 
 import json
 import os
+import gc
 import time
 import tempfile
 from pathlib import Path
@@ -388,6 +389,16 @@ def process_policy(file_obj) -> dict[str, Any]:
         return clean_json(result)
 
     finally:
+        # Step 9: Immediate memory cleanup
+        if 'full_text' in locals():
+            del full_text
+        if 'chunks' in locals():
+            del chunks
+        if 'table_data' in locals():
+            del table_data
+        
+        gc.collect()
+
         if os.path.exists(tmp_path):
             os.unlink(tmp_path)
 
