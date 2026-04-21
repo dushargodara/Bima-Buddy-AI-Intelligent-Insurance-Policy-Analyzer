@@ -3,6 +3,11 @@ flask-cors
 gunicorn
 requests
 python-dotenv
+pdfplumber
+pydantic
 pandas==2.0.3
 numpy==1.24.4
+numpy-financial
+scikit-learn
+joblib
 google-genai
