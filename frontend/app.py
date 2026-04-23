@@ -73,7 +73,7 @@ st.markdown("""
 
 def show_home():
     st.markdown("""
-    <div class="hero-container">
+    <div class="hero-container animate-fade-up">
         <div class="hero-logo">🛡️</div>
         <h1 class="hero-title">BimaBuddy AI</h1>
         <p class="hero-subtitle">Understand Your Insurance Policy Instantly</p>
@@ -83,33 +83,33 @@ def show_home():
     f1, f2, f3, f4 = st.columns(4)
     with f1:
         st.markdown("""
-        <div class="feature-card">
+        <div class="feature-card animate-fade-up delay-1">
             <div class="feature-icon">🧠</div>
-            <div class="feature-title">Smart Analysis</div>
+            <h4 class="feature-title" style="margin-top:0;">Smart Analysis</h4>
             <div class="feature-desc">AI-powered extraction of key benefits and terms</div>
         </div>
         """, unsafe_allow_html=True)
     with f2:
         st.markdown("""
-        <div class="feature-card">
+        <div class="feature-card animate-fade-up delay-2">
             <div class="feature-icon">👀</div>
-            <div class="feature-title">Risk Detection</div>
+            <h4 class="feature-title" style="margin-top:0;">Risk Detection</h4>
             <div class="feature-desc">Uncovers hidden clauses and exclusions</div>
         </div>
         """, unsafe_allow_html=True)
     with f3:
         st.markdown("""
-        <div class="feature-card">
+        <div class="feature-card animate-fade-up delay-3">
             <div class="feature-icon">📊</div>
-            <div class="feature-title">Financial Insights</div>
+            <h4 class="feature-title" style="margin-top:0;">Financial Insights</h4>
             <div class="feature-desc">Benchmarks against FDs and Mutual Funds</div>
         </div>
         """, unsafe_allow_html=True)
     with f4:
         st.markdown("""
-        <div class="feature-card">
+        <div class="feature-card animate-fade-up delay-4">
             <div class="feature-icon">⚖️</div>
-            <div class="feature-title">Policy Comparison</div>
+            <h4 class="feature-title" style="margin-top:0;">Policy Comparison</h4>
             <div class="feature-desc">Objectively compare coverage and limitations</div>
         </div>
         """, unsafe_allow_html=True)
@@ -118,9 +118,11 @@ def show_home():
 
 
 def show_analyze():
-    st.title("🔍 Analyze Your Policy")
-    st.markdown("Upload your insurance policy PDF to extract key insights instantly.")
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+        <h1 style='font-size: 2.5rem; font-weight: 700; color: #1C1C1E; margin-bottom: 0.25rem;'>Analyze Your Policy</h1>
+        <p style='font-size: 1.1rem; color: #666; margin-top: 0;'>Upload your insurance policy PDF to extract key insights instantly.</p>
+        <br>
+    """, unsafe_allow_html=True)
 
     col_up1, col_up2, col_up3 = st.columns([1, 2, 1])
     with col_up2:
@@ -162,14 +164,16 @@ def show_analyze():
 
 
 def show_how_it_works():
-    st.title("ℹ️ How It Works")
-    st.markdown("Understanding how BimaBuddy AI processes your insurance policy.")
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+        <h1 style='font-size: 2.5rem; font-weight: 700; color: #1C1C1E; margin-bottom: 0.25rem;'>How It Works</h1>
+        <p style='font-size: 1.1rem; color: #666; margin-top: 0;'>Understanding how BimaBuddy AI processes your insurance policy.</p>
+        <br>
+    """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col1:
         st.markdown("""
-        <div class="data-card">
+        <div class="data-card animate-fade-up delay-1">
             <div class="feature-icon">1️⃣</div>
             <div class="feature-title">Upload</div>
             <div class="feature-desc">Upload your insurance policy in PDF format. We support most standard document formats.</div>
@@ -178,7 +182,7 @@ def show_how_it_works():
 
     with col2:
         st.markdown("""
-        <div class="data-card">
+        <div class="data-card animate-fade-up delay-2">
             <div class="feature-icon">2️⃣</div>
             <div class="feature-title">AI Processing</div>
             <div class="feature-desc">Our advanced AI scans the document, extracts key clauses, and identifies financial data points.</div>
@@ -187,7 +191,7 @@ def show_how_it_works():
 
     with col3:
         st.markdown("""
-        <div class="data-card">
+        <div class="data-card animate-fade-up delay-3">
             <div class="feature-icon">3️⃣</div>
             <div class="feature-title">Review Insights</div>
             <div class="feature-desc">Get a detailed breakdown of benefits, hidden risks, and a comparison with other investment options.</div>
@@ -200,12 +204,14 @@ def show_how_it_works():
 
 
 def show_about():
-    st.title("📖 About BimaBuddy AI")
-    st.markdown("Bringing transparency to the insurance industry through Artificial Intelligence.")
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+        <h1 style='font-size: 2.5rem; font-weight: 700; color: #1C1C1E; margin-bottom: 0.25rem;'>About BimaBuddy AI</h1>
+        <p style='font-size: 1.1rem; color: #666; margin-top: 0;'>Bringing transparency to the insurance industry through Artificial Intelligence.</p>
+        <br>
+    """, unsafe_allow_html=True)
     
     st.markdown("""
-    <div class="risk-box" style="margin-bottom: 2rem;">
+    <div class="risk-box animate-fade-up delay-1" style="margin-bottom: 2rem;">
         <h3 style="color: #1C1C1E; margin-top: 0;">Our Mission</h3>
         <p style="color: #3A3A3C; font-size: 1.05rem; line-height: 1.6;">
             Insurance policies are often filled with complex jargon, hidden clauses, and convoluted financial terms. 
@@ -219,24 +225,26 @@ def show_about():
     col1, col2 = st.columns(2)
     with col1:
         st.markdown("""
-        <div class="feature-card">
-            <div class="feature-title">Unbiased Analysis</div>
+        <div class="feature-card animate-fade-up delay-2">
+            <h4 class="feature-title" style="margin-top:0;">Unbiased Analysis</h4>
             <div class="feature-desc">We don't sell insurance. Our insights are completely objective and designed to protect your interests.</div>
         </div>
         """, unsafe_allow_html=True)
     with col2:
         st.markdown("""
-        <div class="feature-card">
-            <div class="feature-title">Advanced Technology</div>
+        <div class="feature-card animate-fade-up delay-3">
+            <h4 class="feature-title" style="margin-top:0;">Advanced Technology</h4>
             <div class="feature-desc">Powered by state-of-the-art Large Language Models customized for legal and financial document parsing.</div>
         </div>
         """, unsafe_allow_html=True)
 
 
 def show_contact():
-    st.title("📞 Contact Us")
-    st.markdown("Have questions or feedback? We'd love to hear from you.")
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("""
+        <h1 style='font-size: 2.5rem; font-weight: 700; color: #1C1C1E; margin-bottom: 0.25rem;'>Contact Us</h1>
+        <p style='font-size: 1.1rem; color: #666; margin-top: 0;'>Have questions or feedback? We'd love to hear from you.</p>
+        <br>
+    """, unsafe_allow_html=True)
     
     col1, col2 = st.columns([1, 1])
     with col1:
@@ -256,7 +264,7 @@ def show_contact():
 
     with col2:
         st.markdown("""
-        <div class="risk-box" style="height: 100%;">
+        <div class="risk-box animate-fade-up delay-1" style="height: 100%;">
             <h3 style="color: #1C1C1E; margin-top: 0;">Support Information</h3>
             <p style="color: #3A3A3C; margin-bottom: 1.5rem;">
                 Our support team is available Monday through Friday to assist you with any inquiries regarding the BimaBuddy AI platform.

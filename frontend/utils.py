@@ -7,6 +7,22 @@ def inject_custom_css():
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+    @keyframes fadeUp {
+        0% { opacity: 0; transform: translateY(20px); }
+        100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-up {
+        animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+    }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+    .delay-4 { animation-delay: 0.4s; }
+    .delay-5 { animation-delay: 0.5s; }
+    .delay-6 { animation-delay: 0.6s; }
+
     html, body, [class*="css"] { 
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
         color: #1C1C1E;
@@ -86,11 +102,15 @@ def inject_custom_css():
         color: #1C1C1E;
         font-size: 1.25rem;
         margin-bottom: 0.75rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
     .feature-desc {
         font-size: 1rem;
         color: #8E8E93;
-        line-height: 1.5;
+        line-height: 1.6;
+        display: block;
     }
 
     /* Data Cards */
@@ -159,6 +179,7 @@ def inject_custom_css():
         font-weight: 700;
         color: #1C1C1E;
         letter-spacing: -0.02em;
+        white-space: nowrap;
     }
 
     /* Status Badges */
@@ -225,6 +246,11 @@ def inject_custom_css():
         border-radius: 16px;
         padding: 1.75rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    .risk-box:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.06);
     }
 
     /* Recommendation Box */
@@ -268,7 +294,7 @@ def inject_custom_css():
     }
     .stButton>button:hover {
         background: #0066CC;
-        transform: translateY(-2px);
+        transform: translateY(-2px) scale(1.02);
         box-shadow: 0 6px 16px rgba(0, 122, 255, 0.4);
         color: #FFFFFF;
         border: none;
@@ -347,12 +373,12 @@ def fmt_pct(value, decimals=2):
     except (TypeError, ValueError):
         return "N/A"
 
-def draw_card(title, value, subtext="", highlight=False, tooltip=""):
+def draw_card(title, value, subtext="", highlight=False, tooltip="", anim_class=""):
     hl_class = " highlight" if highlight else ""
     icon = f'<span style="font-size:1rem; cursor:help; color:#64748b;" title="{tooltip}">ⓘ</span>' if tooltip else ""
     
     st.markdown(f"""
-    <div class="data-card{hl_class}">
+    <div class="data-card{hl_class} {anim_class}">
         <div class="data-card-title">
             <span>{title}</span>
             {icon}
@@ -362,9 +388,9 @@ def draw_card(title, value, subtext="", highlight=False, tooltip=""):
     </div>
     """, unsafe_allow_html=True)
 
-def draw_invest_card(title, value, color_hex):
+def draw_invest_card(title, value, color_hex, anim_class=""):
     st.markdown(f"""
-    <div class="invest-card" style="border-top-color: {color_hex};">
+    <div class="invest-card {anim_class}" style="border-top-color: {color_hex};">
         <div class="invest-card-title">{title}</div>
         <div class="invest-card-value" style="color: {color_hex};">{value}</div>
     </div>
@@ -375,7 +401,7 @@ def render_result(data: dict) -> None:
         st.warning("⚠️ Partial analysis: AI could not fully parse the document.")
 
     st.markdown("""
-    <div class="success-banner">
+    <div class="success-banner animate-fade-up">
         <span>✅</span>
         <span>Analysis Completed Successfully</span>
     </div>
@@ -391,7 +417,7 @@ def render_result(data: dict) -> None:
     elif "Poor" in roi_verdict: badge_cls = "badge-danger"
 
     st.markdown(f"""
-    <div style="display:flex; gap:1rem; margin-bottom:2.5rem; align-items:center; flex-wrap:wrap;">
+    <div class="animate-fade-up" style="display:flex; gap:1rem; margin-bottom:2.5rem; align-items:center; flex-wrap:wrap;">
         <span class="badge badge-neutral">📋 Policy Type: {policy_type}</span>
         <span class="badge badge-neutral">💰 Returns Type: {gvng}</span>
         <span class="badge {badge_cls}">🎯 Verdict: {roi_verdict}</span>
@@ -401,9 +427,9 @@ def render_result(data: dict) -> None:
     summary = data.get("policy_summary", {})
     simple  = summary.get("simple_summary") if isinstance(summary, dict) else str(summary)
     if simple:
-        st.markdown(f"<div class='risk-box' style='margin-bottom:3rem;'><h4 style='margin-top:0; color:#1C1C1E;'>Summary</h4><p style='color:#3A3A3C; font-size:1.05rem; margin-bottom:0;'>{simple}</p></div>", unsafe_allow_html=True)
+        st.markdown(f"<div class='risk-box animate-fade-up delay-1' style='margin-bottom:3rem;'><h4 style='margin-top:0; color:#1C1C1E;'>Summary</h4><p style='color:#3A3A3C; font-size:1.05rem; margin-bottom:0;'>{simple}</p></div>", unsafe_allow_html=True)
 
-    st.markdown("<div class='section-title'>Core Financials</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title animate-fade-up delay-2'>Core Financials</div>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     total_investment = data.get("total_investment") or 0
     maturity_value   = data.get("maturity_value")   or 0
@@ -412,12 +438,12 @@ def render_result(data: dict) -> None:
 
     delta_str = f"+{fmt_inr(net_profit)}" if net_profit >= 0 else f"-{fmt_inr(abs(net_profit))}"
 
-    with c1: draw_card("Total Investment", fmt_inr(total_investment), "Premiums over term", tooltip="Total money you pay to the insurance company over the years.")
-    with c2: draw_card("Maturity Value", fmt_inr(maturity_value), "Expected corpus", tooltip="The total money you get back at the end of the policy.")
-    with c3: draw_card("Net Profit", delta_str, "Maturity minus investment", tooltip="Your overall earnings.")
-    with c4: draw_card("Annualized ROI", fmt_pct(roi), "After-tax return", highlight=True, tooltip="Your yearly return after factoring in the income tax you saved.")
+    with c1: draw_card("Total Investment", fmt_inr(total_investment), "Premiums over term", tooltip="Total money you pay to the insurance company over the years.", anim_class="animate-fade-up delay-2")
+    with c2: draw_card("Maturity Value", fmt_inr(maturity_value), "Expected corpus", tooltip="The total money you get back at the end of the policy.", anim_class="animate-fade-up delay-2")
+    with c3: draw_card("Net Profit", delta_str, "Maturity minus investment", tooltip="Your overall earnings.", anim_class="animate-fade-up delay-2")
+    with c4: draw_card("Annualized ROI", fmt_pct(roi), "After-tax return", highlight=True, tooltip="Your yearly return after factoring in the income tax you saved.", anim_class="animate-fade-up delay-2")
 
-    st.markdown("<div class='section-title'>Rate Metrics & Premium</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title animate-fade-up delay-3'>Rate Metrics & Premium</div>", unsafe_allow_html=True)
     c1, c2, c3, c4 = st.columns(4)
     cagr = data.get("cagr") or data.get("cagr_percent")
     irr  = data.get("irr")  or data.get("irr_percent")
@@ -427,23 +453,23 @@ def render_result(data: dict) -> None:
     prem_amt = fmt_inr(prem_details.get("amount"))
     prem_freq = (prem_details.get("frequency") or "yearly").title()
     
-    with c1: draw_card("CAGR", fmt_pct(cagr), "Pure growth rate", tooltip="Your yearly growth rate equivalent to a savings account.")
-    with c2: draw_card("IRR", fmt_pct(irr), "Cashflow return rate", tooltip="True yearly return considering exact payment dates.")
-    with c3: draw_card("Break-Even", f"{float(be):.1f} yrs" if be is not None else "N/A", "Value > Premiums", tooltip="When your policy value exceeds total premiums paid.")
-    with c4: draw_card("Premium", prem_amt, f"{prem_freq} payment", tooltip="Regular payment amount.")
+    with c1: draw_card("CAGR", fmt_pct(cagr), "Pure growth rate", tooltip="Your yearly growth rate equivalent to a savings account.", anim_class="animate-fade-up delay-3")
+    with c2: draw_card("IRR", fmt_pct(irr), "Cashflow return rate", tooltip="True yearly return considering exact payment dates.", anim_class="animate-fade-up delay-3")
+    with c3: draw_card("Break-Even", f"{float(be):.1f} yrs" if be is not None else "N/A", "Value > Premiums", tooltip="When your policy value exceeds total premiums paid.", anim_class="animate-fade-up delay-3")
+    with c4: draw_card("Premium", prem_amt, f"{prem_freq} payment", tooltip="Regular payment amount.", anim_class="animate-fade-up delay-3")
 
-    st.markdown("<div class='section-title'>Advanced Insights</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title animate-fade-up delay-4'>Advanced Insights</div>", unsafe_allow_html=True)
     adv = data.get("advanced_metrics", {})
     c1, c2, c3 = st.columns(3)
     with c1:
         tax_ben = data.get("tax_benefit_80c") or adv.get("tax_saved_estimated") or 0
-        draw_card("80C Tax Benefit", fmt_inr(tax_ben), "Estimated tax saved")
+        draw_card("80C Tax Benefit", fmt_inr(tax_ben), "Estimated tax saved", anim_class="animate-fade-up delay-4")
     with c2:
         infl_adj = data.get("inflation_adj_net_profit") or adv.get("inflation_adj_net_profit") or 0
-        draw_card("Inflation-Adj Profit", fmt_inr(infl_adj), "Today's purchasing power")
+        draw_card("Inflation-Adj Profit", fmt_inr(infl_adj), "Today's purchasing power", anim_class="animate-fade-up delay-4")
     with c3:
         adj_cagr = adv.get("inflation_adjusted_cagr")
-        draw_card("Real CAGR", fmt_pct(adj_cagr), "Stripping 6% inflation")
+        draw_card("Real CAGR", fmt_pct(adj_cagr), "Stripping 6% inflation", anim_class="animate-fade-up delay-4")
 
     risky = data.get("risky_clauses", [])
     if risky:
@@ -452,12 +478,12 @@ def render_result(data: dict) -> None:
         for r in risky:
             st.markdown(f"- **{r.get('keyword', '')}:** {r.get('snippet', '')[:250]}…")
 
-    st.markdown("<div class='section-title'>Qualitative Analysis</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title animate-fade-up delay-5'>Qualitative Analysis</div>", unsafe_allow_html=True)
 
     c1, c2 = st.columns([1, 1])
     with c1:
-        st.markdown("<div class='risk-box' style='height: 100%;'>", unsafe_allow_html=True)
-        st.markdown("<h4 style='color:#1C1C1E; margin-top:0;'>✅ Key Benefits</h4>", unsafe_allow_html=True)
+        st.markdown("<div class='risk-box animate-fade-up delay-5' style='height: 100%;'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color:#1C1C1E; margin-top:0;'>Key Benefits</h4>", unsafe_allow_html=True)
         benefits = data.get("key_benefits", [])
         if benefits:
             pills = "".join(f"<div class='pill pill-green'><b>✓</b> &nbsp; {b}</div>" for b in benefits)
@@ -465,7 +491,7 @@ def render_result(data: dict) -> None:
         else:
             st.markdown("<p style='color:#8E8E93;'>No benefits extracted.</p><br>", unsafe_allow_html=True)
 
-        st.markdown("<h4 style='color:#1C1C1E; margin-top:1rem;'>🔍 Hidden Clauses</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color:#1C1C1E; margin-top:1rem;'>Hidden Clauses</h4>", unsafe_allow_html=True)
         clauses = data.get("hidden_clauses", [])
         if clauses:
             pills = "".join(f"<div class='pill pill-yellow'><b>⚠️</b> &nbsp; {c}</div>" for c in clauses)
@@ -475,8 +501,8 @@ def render_result(data: dict) -> None:
         st.markdown("</div>", unsafe_allow_html=True)
 
     with c2:
-        st.markdown("<div class='risk-box' style='height: 100%;'>", unsafe_allow_html=True)
-        st.markdown("<h4 style='color:#1C1C1E; margin-top:0;'>❌ Exclusions</h4>", unsafe_allow_html=True)
+        st.markdown("<div class='risk-box animate-fade-up delay-6' style='height: 100%;'>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color:#1C1C1E; margin-top:0;'>Exclusions</h4>", unsafe_allow_html=True)
         exclusions = data.get("exclusions", [])
         if exclusions:
             pills = "".join(f"<div class='pill pill-red'><b>✕</b> &nbsp; {e}</div>" for e in exclusions)
@@ -489,7 +515,7 @@ def render_result(data: dict) -> None:
         ml_risk    = data.get("ml_risk_prediction", "N/A")
         r_badge = "badge-good" if risk_score <= 3 else ("badge-warning" if risk_score <= 6 else "badge-danger")
         
-        st.markdown("<h4 style='color:#1C1C1E; margin-top:1rem;'>🛡️ Risk Analysis</h4>", unsafe_allow_html=True)
+        st.markdown("<h4 style='color:#1C1C1E; margin-top:1rem;'>Risk Analysis</h4>", unsafe_allow_html=True)
         st.markdown(f"""
         <div style="margin-top: 0.5rem; background: #F2F2F7; padding: 1.25rem; border-radius: 12px; border: 1px solid #E5E5EA;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
@@ -505,7 +531,7 @@ def render_result(data: dict) -> None:
         st.markdown("</div>", unsafe_allow_html=True)
 
 
-    st.markdown("<div class='section-title'>Investment Comparison</div>", unsafe_allow_html=True)
+    st.markdown("<div class='section-title animate-fade-up delay-6'>Investment Comparison</div>", unsafe_allow_html=True)
     
     comp = data.get("comparison", {})
     policy_roi = data.get("roi") or data.get("roi_percent") or 0
@@ -513,20 +539,20 @@ def render_result(data: dict) -> None:
     mf_val = comp.get("mf_sip_12pct_projection") or 0
 
     c1, c2, c3 = st.columns(3)
-    r_color = "#34d399" if policy_roi >= 7 else "#f87171"
+    r_color = "#34C759" if policy_roi >= 7 else "#FF3B30"
     with c1:
-        draw_invest_card("Your Policy Returns", fmt_pct(policy_roi), "#1C1C1E")
+        draw_invest_card("Your Policy Returns", fmt_pct(policy_roi), "#1C1C1E", anim_class="animate-fade-up delay-6")
     with c2:
-        draw_invest_card("Fixed Deposit (7%)", fmt_inr(fd_val), "#8E8E93")
+        draw_invest_card("Fixed Deposit (7%)", fmt_inr(fd_val), "#8E8E93", anim_class="animate-fade-up delay-6")
     with c3:
-        draw_invest_card("Mutual Fund (12%)", fmt_inr(mf_val), "#007AFF")
+        draw_invest_card("Mutual Fund (12%)", fmt_inr(mf_val), "#007AFF", anim_class="animate-fade-up delay-6")
 
     rec = data.get("recommendation", "")
     if rec:
         st.markdown(f"""
-        <div class="rec-box">
+        <div class="rec-box animate-fade-up delay-6">
             <strong>💡 Recommendation:</strong><br/>
-            <p style="margin-top: 0.5rem; color: #1e3a8a;">{rec}</p>
+            <p style="margin-top: 0.5rem; color: #1C1C1E;">{rec}</p>
         </div>
         """, unsafe_allow_html=True)
 
