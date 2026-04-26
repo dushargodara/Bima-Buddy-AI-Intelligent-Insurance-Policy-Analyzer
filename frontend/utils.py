@@ -566,6 +566,6 @@ def render_footer():
     st.markdown("""
     <div class="footer">
         <p>Made with ❤️ by <strong>BimaBuddy AI</strong></p>
-        <p>Contact: support@bimabuddy.ai</p>
+        <p>Contact: bimabuddyai@gmail.com</p>
     </div>
     """, unsafe_allow_html=True)

@@ -86,7 +86,7 @@ def show_home():
         <div class="feature-card animate-fade-up delay-1">
             <div class="feature-icon">🧠</div>
             <h4 class="feature-title" style="margin-top:0;">Smart Analysis</h4>
-            <div class="feature-desc">AI-powered extraction of key benefits and terms</div>
+            <div class="feature-desc">AI-powered extraction of key benefits, risks, and important policy details</div>
         </div>
         """, unsafe_allow_html=True)
     with f2:
@@ -94,7 +94,7 @@ def show_home():
         <div class="feature-card animate-fade-up delay-2">
             <div class="feature-icon">👀</div>
             <h4 class="feature-title" style="margin-top:0;">Risk Detection</h4>
-            <div class="feature-desc">Uncovers hidden clauses and exclusions</div>
+            <div class="feature-desc">Identifies hidden clauses, exclusions, and potential risks in your policy</div>
         </div>
         """, unsafe_allow_html=True)
     with f3:
@@ -102,7 +102,7 @@ def show_home():
         <div class="feature-card animate-fade-up delay-3">
             <div class="feature-icon">📊</div>
             <h4 class="feature-title" style="margin-top:0;">Financial Insights</h4>
-            <div class="feature-desc">Benchmarks against FDs and Mutual Funds</div>
+            <div class="feature-desc">Compares your policy with fixed deposits and mutual funds</div>
         </div>
         """, unsafe_allow_html=True)
     with f4:
@@ -110,7 +110,7 @@ def show_home():
         <div class="feature-card animate-fade-up delay-4">
             <div class="feature-icon">⚖️</div>
             <h4 class="feature-title" style="margin-top:0;">Policy Comparison</h4>
-            <div class="feature-desc">Objectively compare coverage and limitations</div>
+            <div class="feature-desc">Compare your policy’s coverage and limitations clearly and objectively</div>
         </div>
         """, unsafe_allow_html=True)
     
@@ -176,7 +176,7 @@ def show_how_it_works():
         <div class="data-card animate-fade-up delay-1">
             <div class="feature-icon">1️⃣</div>
             <div class="feature-title">Upload</div>
-            <div class="feature-desc">Upload your insurance policy in PDF format. We support most standard document formats.</div>
+            <div class="feature-desc">Securely upload your policy PDF for instant analysis. Your document is processed in-memory and never stored.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -185,7 +185,7 @@ def show_how_it_works():
         <div class="data-card animate-fade-up delay-2">
             <div class="feature-icon">2️⃣</div>
             <div class="feature-title">AI Processing</div>
-            <div class="feature-desc">Our advanced AI scans the document, extracts key clauses, and identifies financial data points.</div>
+            <div class="feature-desc">Our system reads your policy and pulls out key details like coverage, important clauses, and financial information.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -194,19 +194,19 @@ def show_how_it_works():
         <div class="data-card animate-fade-up delay-3">
             <div class="feature-icon">3️⃣</div>
             <div class="feature-title">Review Insights</div>
-            <div class="feature-desc">Get a detailed breakdown of benefits, hidden risks, and a comparison with other investment options.</div>
+            <div class="feature-desc">Get a clear summary of your policy, including benefits, possible risks, and important details.</div>
         </div>
         """, unsafe_allow_html=True)
 
     st.markdown("<br><br>", unsafe_allow_html=True)
     st.markdown("### Privacy & Security")
-    st.info("We do not store your personal insurance documents. Files are processed in memory and immediately discarded after analysis.")
+    st.info("Your privacy is our priority. Documents are encrypted during transfer and processed securely in temporary memory. We never store your files or share them with third parties, all data is permanently discarded immediately after analysis.")
 
 
 def show_about():
     st.markdown("""
         <h1 style='font-size: 2.5rem; font-weight: 700; color: #1C1C1E; margin-bottom: 0.25rem;'>About BimaBuddy AI</h1>
-        <p style='font-size: 1.1rem; color: #666; margin-top: 0;'>Bringing transparency to the insurance industry through Artificial Intelligence.</p>
+        <p style='font-size: 1.1rem; color: #666; margin-top: 0;'>BimaBuddy AI helps you understand complex insurance policies using simple, AI-powered insights.</p>
         <br>
     """, unsafe_allow_html=True)
     
@@ -214,9 +214,7 @@ def show_about():
     <div class="risk-box animate-fade-up delay-1" style="margin-bottom: 2rem;">
         <h3 style="color: #1C1C1E; margin-top: 0;">Our Mission</h3>
         <p style="color: #3A3A3C; font-size: 1.05rem; line-height: 1.6;">
-            Insurance policies are often filled with complex jargon, hidden clauses, and convoluted financial terms. 
-            Our mission is to democratize this information, making it accessible and understandable for everyone.
-            We believe that every policyholder deserves to know exactly what they are signing up for.
+            Insurance policies are often full of complex terms, hidden clauses, and confusing details. Our mission is to make this information simple and easy to understand for everyone. We believe every policyholder should clearly know what they are signing up for.ance policies are often filled with complex jargon, hidden clauses, and convoluted financial terms.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -227,14 +225,14 @@ def show_about():
         st.markdown("""
         <div class="feature-card animate-fade-up delay-2">
             <h4 class="feature-title" style="margin-top:0;">Unbiased Analysis</h4>
-            <div class="feature-desc">We don't sell insurance. Our insights are completely objective and designed to protect your interests.</div>
+            <div class="feature-desc">We don’t sell insurance. Our insights are unbiased and focused only on helping you make better decisions.</div>
         </div>
         """, unsafe_allow_html=True)
     with col2:
         st.markdown("""
         <div class="feature-card animate-fade-up delay-3">
             <h4 class="feature-title" style="margin-top:0;">Advanced Technology</h4>
-            <div class="feature-desc">Powered by state-of-the-art Large Language Models customized for legal and financial document parsing.</div>
+            <div class="feature-desc">Powered by advanced AI designed to understand and analyze legal and financial documents.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -267,15 +265,15 @@ def show_contact():
         <div class="risk-box animate-fade-up delay-1" style="height: 100%;">
             <h3 style="color: #1C1C1E; margin-top: 0;">Support Information</h3>
             <p style="color: #3A3A3C; margin-bottom: 1.5rem;">
-                Our support team is available Monday through Friday to assist you with any inquiries regarding the BimaBuddy AI platform.
+                Our support team is available Monday to Friday to help with any questions about BimaBuddy AI.
             </p>
             <div style="display: flex; align-items: center; margin-bottom: 1rem;">
                 <span style="font-size: 1.5rem; margin-right: 1rem;">📧</span>
-                <span style="color: #1C1C1E; font-weight: 500;">support@bimabuddy.ai</span>
+                <span style="color: #1C1C1E; font-weight: 500;">bimabuddyai@gmail.com</span>
             </div>
             <div style="display: flex; align-items: center; margin-bottom: 1rem;">
                 <span style="font-size: 1.5rem; margin-right: 1rem;">🏢</span>
-                <span style="color: #1C1C1E; font-weight: 500;">BimaBuddy HQ, Tech Park, India</span>
+                <span style="color: #1C1C1E; font-weight: 500;">Remote, India</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
