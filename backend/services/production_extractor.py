@@ -118,6 +118,9 @@ def extract_policy_data(file):
             """
             
             response = model.generate_content(prompt)
+            print("===== PRODUCTION EXTRACT RESPONSE =====")
+            print(response.text)
+            print("=======================================")
             
             try:
                 return json.loads(response.text)

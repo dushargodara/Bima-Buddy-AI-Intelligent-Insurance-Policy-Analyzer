@@ -219,6 +219,9 @@ def extract_policy_data(file):
             """
             
             response = model.generate_content(prompt)
+            print("===== STRICT EXTRACTOR RESPONSE =====")
+            print(response.text)
+            print("====================================")
             
             try:
                 ai_result = json.loads(response.text)
