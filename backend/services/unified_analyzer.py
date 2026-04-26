@@ -14,8 +14,8 @@ class UnifiedAnalysis(BaseModel):
     sum_assured: int = Field(description="Sum assured / death benefit as integer")
     
     # Qualitative insights
-    policy_summary: str = Field(description="3-5 line simple summary of the policy")
-    key_benefits: list[str] = Field(description="List of key benefits in bullet points")
+    policy_summary: str = Field(description="A comprehensive, well-structured paragraph summarizing the policy's purpose, main benefits, target audience, and key financial terms in plain English. Avoid jargon.")
+    key_benefits: list[str] = Field(description="List of 5-8 highly specific, impactful, and user-friendly key benefits extracted from the policy. Focus on exact numbers, guaranteed returns, tax savings, riders, and unique perks. Make them read like premium marketing highlights but remain strictly factual.")
     exclusions: list[str] = Field(description="List of exclusions in bullet points")
     hidden_clauses: list[str] = Field(description="List of hidden clauses or catch elements")
 
@@ -43,8 +43,8 @@ def unified_analyze(text: str) -> dict:
         3. policy_term: Total years of coverage.
         4. maturity_value: Amount paid at survival/maturity. 
         5. sum_assured: Death benefit amount.
-        6. policy_summary: 3-5 sentence plain English summary.
-        7. key_benefits: List of 4-6 bullet points (under 20 words each).
+        6. policy_summary: Write a highly detailed, comprehensive, and engaging paragraph summarizing the policy. Explain its core purpose, target audience, main benefits, and key financial terms. Make it easy to read but thorough (at least 4-6 sentences).
+        7. key_benefits: List of 5-8 highly specific and impactful key benefits (under 20 words each). Focus on exact coverage amounts, guaranteed returns, tax savings, riders, and unique perks. Make them read like marketing highlights but remain strictly factual.
         8. exclusions: List of 3-5 things NOT covered.
         9. hidden_clauses: List of 3-5 tricky terms (lock-ins, suicide clause, GST impact).
         

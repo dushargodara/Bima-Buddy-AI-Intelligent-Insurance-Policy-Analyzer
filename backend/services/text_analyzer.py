@@ -6,8 +6,8 @@ from google import genai
 from google.genai import types
 
 class PolicyInsights(BaseModel):
-    policy_summary: str = Field(description="A concise 3-5 line simple summary of the policy.")
-    key_benefits: list[str] = Field(description="List of key benefits in simple, user-friendly bullet points (under 20 words each).")
+    policy_summary: str = Field(description="A comprehensive, well-structured paragraph summarizing the policy's purpose, main benefits, target audience, and key financial terms in plain English. Avoid jargon.")
+    key_benefits: list[str] = Field(description="List of 5-8 highly specific, impactful, and user-friendly key benefits extracted from the policy. Focus on exact numbers, guaranteed returns, tax savings, riders, and unique perks. Make them read like premium marketing highlights but remain strictly factual.")
     exclusions: list[str] = Field(description="List of exclusions in simple, user-friendly bullet points (under 20 words each).")
     hidden_clauses: list[str] = Field(description="List of hidden clauses or catch elements into simple, user-friendly bullet points (under 20 words each).")
 
@@ -423,23 +423,18 @@ def analyze_policy_text(text: str) -> dict:
 
         prompt = f"""
         You are an expert insurance policy analyst. Analyze the following insurance policy text and extract:
-        1. Policy Summary — write a clear, factual 3-5 sentence plain-English paragraph describing:
+        1. Policy Summary — write a highly detailed, comprehensive, and engaging paragraph summarizing the policy. Explain its core purpose, target audience, main benefits, and key financial terms. Make it easy to read but thorough (at least 4-6 sentences). Include:
            - What type of plan this is (term/endowment/ULIP/money-back/whole life)
            - The key numbers: sum assured, annual premium, policy term, maturity benefit (if mentioned)
            - Whether returns are guaranteed or market-linked
            - Key added features (bonus, tax benefit, riders, loan facility)
            NEVER use vague phrases like "Policy details extracted" — always write a specific, informative summary.
-        2. Key benefits — you MUST always extract at least 4-8 specific benefits. Look for:
-           - Death benefit / life cover
-           - Maturity benefit / survival benefit
-           - Bonus details (reversionary, loyalty, terminal)
-           - Tax benefits (80C, 10(10D))
-           - Riders (accident, disability, critical illness)
-           - Loan / surrender value / partial withdrawal
-           - Any guaranteed returns or money-back features
-           - Premium waiver or flexible payment features
+        2. Key Benefits — you MUST extract 5-8 highly specific and impactful benefits. Make them read like premium marketing highlights while remaining strictly factual. Focus on exact coverage amounts, guaranteed returns, tax savings, riders, and unique perks.
+           - Emphasize exact numbers (e.g. "Rs. 1 Crore Life Cover") if available.
+           - Highlight Death/Maturity/Survival benefits, bonuses, and tax deductions (80C, 10(10D)).
+           - Detail specific riders (accident, critical illness) and loan/surrender features.
            If the text is sparse, INFER standard benefits from the policy type (endowment/term/ULIP/money-back).
-           NEVER return an empty list — always provide at least 4 benefits.
+           NEVER return an empty list — always provide at least 5 benefits.
         3. Exclusions — conditions NOT covered. MUST always find at least 3-5. Look for:
            - Suicide exclusion
            - Pre-existing disease exclusion
@@ -494,7 +489,7 @@ def analyze_policy_text(text: str) -> dict:
             print("Structured schema failed, trying plain JSON fallback:", schema_err)
             fallback_prompt = f"""Analyze this insurance policy and return ONLY a valid JSON object with exactly these keys:
 {{
-  "policy_summary": "3-5 sentence plain-English summary of the policy",
+  "policy_summary": "Highly detailed, comprehensive, and engaging 4-6 sentence plain-English summary of the policy",
   "key_benefits": ["benefit 1", "benefit 2", "benefit 3", "benefit 4"],
   "exclusions": ["exclusion 1", "exclusion 2", "exclusion 3"],
   "hidden_clauses": ["clause 1", "clause 2", "clause 3"]

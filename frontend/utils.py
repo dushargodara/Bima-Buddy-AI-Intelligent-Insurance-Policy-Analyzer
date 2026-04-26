@@ -463,13 +463,13 @@ def render_result(data: dict) -> None:
     c1, c2, c3 = st.columns(3)
     with c1:
         tax_ben = data.get("tax_benefit_80c") or adv.get("tax_saved_estimated") or 0
-        draw_card("80C Tax Benefit", fmt_inr(tax_ben), "Estimated tax saved", anim_class="animate-fade-up delay-4")
+        draw_card("80C Tax Benefit", fmt_inr(tax_ben), "Estimated tax saved", tooltip="Total tax saved under Section 80C over the premium payment term (assuming 31.2% tax bracket).", anim_class="animate-fade-up delay-4")
     with c2:
         infl_adj = data.get("inflation_adj_net_profit") or adv.get("inflation_adj_net_profit") or 0
-        draw_card("Inflation-Adj Profit", fmt_inr(infl_adj), "Today's purchasing power", anim_class="animate-fade-up delay-4")
+        draw_card("Inflation-Adj Profit", fmt_inr(infl_adj), "Today's purchasing power", tooltip="Your net profit expressed in today's money value, assuming a standard 6% annual inflation rate.", anim_class="animate-fade-up delay-4")
     with c3:
         adj_cagr = adv.get("inflation_adjusted_cagr")
-        draw_card("Real CAGR", fmt_pct(adj_cagr), "Stripping 6% inflation", anim_class="animate-fade-up delay-4")
+        draw_card("Real CAGR", fmt_pct(adj_cagr), "Stripping 6% inflation", tooltip="Your actual compound annual growth rate after deducting the 6% annual inflation rate. A negative number means you are losing purchasing power.", anim_class="animate-fade-up delay-4")
 
     risky = data.get("risky_clauses", [])
     if risky:
