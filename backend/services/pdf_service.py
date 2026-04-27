@@ -38,8 +38,9 @@ def extract_text_from_pdf(file):
 
             print(f"PDF OPENED: {len(pdf.pages)} pages found")
             
-            # PERFORMANCE FIX: Limit to first 3 pages
-            max_pages = 3
+            # Increased page limit to capture benefits, exclusions, and hidden clauses
+            # which appear throughout the document, not just the first few pages.
+            max_pages = 10
             pages_to_process = pdf.pages[:max_pages]
 
             for i, page in enumerate(pages_to_process):
@@ -62,10 +63,11 @@ def extract_text_from_pdf(file):
                 except Exception as e:
                     print(f"Page {i+1} error:", e)
 
-            # PERFORMANCE FIX: Smart limit on text length with prioritization
+            # Increased text limit so benefits/exclusions sections are not cut off.
+            # The AI chunking in unified_analyzer will handle large texts efficiently.
             text = text.strip()
-            if len(text) > 6000:
-                text = prioritize_text(text, 6000)
+            if len(text) > 20000:
+                text = prioritize_text(text, 20000)
             
             print(f"TOTAL TEXT EXTRACTED (Priority Mode, {max_pages} pages): {len(text)} chars")
 
