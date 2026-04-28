@@ -4,31 +4,6 @@ import re
 import time
 from google import genai
 from google.genai import types
-from pydantic import BaseModel, Field
-
-
-class UnifiedAnalysis(BaseModel):
-    # Financial data
-    premium: int = Field(description="Annual premium amount as integer")
-    payment_term: int = Field(description="Premium paying term in years")
-    policy_term: int = Field(description="Total policy term in years")
-    maturity_value: int = Field(description="Maturity benefit amount as integer")
-    sum_assured: int = Field(description="Sum assured / death benefit as integer")
-
-    # Qualitative insights
-    policy_summary: str = Field(
-        description="""Write a clean, human-friendly summary of this policy in MAXIMUM 4-5 lines. 
-RULES: Use simple everyday English — no legal jargon. Do NOT copy text from the document. Do NOT include definitions, clauses, or policy wording. Explain: (1) what the policy offers, (2) type of plan, (3) the key benefit (life cover / maturity / income), (4) overall usefulness for a buyer. Write as if explaining to a normal person, not a legal expert."""
-    )
-    key_benefits: list[str] = Field(
-        description="REQUIRED — Do NOT return an empty array. List 5-8 specific key benefits. Include: financial protection, death benefit, maturity benefit, income payouts, premium waiver, riders, tax savings. Infer from context if not explicitly labeled. Each point must be 1-2 lines, clear and factual."
-    )
-    exclusions: list[str] = Field(
-        description="REQUIRED — Do NOT return an empty array. List 3-5 situations where benefits are NOT paid. Include: medical non-disclosure, suicide clause, pre-existing conditions, GST/charges/deductions, any limitation or restriction. Infer from context if not explicitly labeled."
-    )
-    hidden_clauses: list[str] = Field(
-        description="REQUIRED — Do NOT return an empty array. List 3-5 tricky terms or hidden conditions. Include: 'subject to...', 'only if...' conditions, policy changes over time, benefit reductions, lock-in periods, surrender charges, dependencies on age or term. Infer from context."
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -76,7 +51,6 @@ def _regex_fallback(text: str) -> dict:
                    "advantages", "features", "highlights", "coverage include"]
     benefits = collect_section(benefit_kws, max_lines=10)
 
-    # Supplement with bullet/numbered lines containing benefit keywords
     benefit_signal = [
         "death benefit", "maturity benefit", "survival benefit", "sum assured",
         "tax benefit", "bonus", "rider", "cover", "waiver", "accidental",
@@ -137,8 +111,6 @@ def _regex_fallback(text: str) -> dict:
             break
 
     # ---- Summary: build a clean, human-friendly version inferred from policy type ----
-    # (Raw PDF lines are intentionally NOT used — they produce legal jargon)
-    # The actual policy-type detection below builds the summary after type is known.
     _raw_summary_lines = []
     for line in lines[:50]:
         if len(line) > 40:
@@ -260,7 +232,6 @@ def _regex_fallback(text: str) -> dict:
             "It suits people who want safe, guaranteed returns with built-in life protection."
         )
     else:
-        # Generic fallback — use a couple of raw lines only as a hint
         hint = " ".join(_raw_summary_lines).strip()
         if hint:
             summary = (
@@ -291,47 +262,60 @@ def _regex_fallback(text: str) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# HELPER: call Gemini with one retry on 429 rate-limit
+# SINGLE-CALL GEMINI ANALYSIS FUNCTION
 # ---------------------------------------------------------------------------
-def _call_gemini_with_retry(client, model: str, contents: str, config) -> str:
-    """Call Gemini API with one automatic retry after 15s on 429 errors."""
-    for attempt in range(2):
-        try:
-            response = client.models.generate_content(
-                model=model,
-                contents=contents,
-                config=config,
-            )
-            return response.text
-        except Exception as e:
-            err = str(e)
-            if ("429" in err or "RESOURCE_EXHAUSTED" in err or "quota" in err.lower()):
-                if attempt == 0:
-                    print(f"GEMINI 429 RATE LIMIT — waiting 15s before retry...")
-                    time.sleep(15)
-                    continue
-            raise  # re-raise non-429 errors or on second attempt
-    return ""
+def analyze_policy(text: str) -> dict:
+    """
+    Analyze insurance policy text using a SINGLE Gemini API call.
+    Returns structured qualitative insights.
+    Falls back to safe defaults if API or parsing fails.
+    """
+    FAILSAFE = {
+        "summary": "Analysis unavailable",
+        "key_benefits": [],
+        "hidden_clauses": [],
+        "exclusions": [],
+        "risk_level": "Unknown",
+    }
 
+    try:
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return FAILSAFE
 
-# ---------------------------------------------------------------------------
-# MERGE HELPER
-# ---------------------------------------------------------------------------
-def _merge_qualitative(merged: dict, new_data: dict) -> None:
-    """Merge qualitative list fields from new_data into merged (deduplicating)."""
-    for field in ("key_benefits", "exclusions", "hidden_clauses"):
-        existing_lower = {s.lower().strip() for s in merged.get(field) or []}
-        for item in new_data.get(field) or []:
-            item_clean = str(item).strip()
-            if item_clean and item_clean.lower() not in existing_lower:
-                merged.setdefault(field, []).append(item_clean)
-                existing_lower.add(item_clean.lower())
+        client = genai.Client(api_key=api_key)
 
-    if not merged.get("policy_summary") or merged["policy_summary"] in (
-        "Analysis failed partially.", "Analysis failed partially due to processing limits.", ""
-    ):
-        if new_data.get("policy_summary"):
-            merged["policy_summary"] = new_data["policy_summary"]
+        # Truncate to avoid hitting token limits
+        policy_text = text[:8000]
+
+        prompt = f"""Return ONLY valid JSON. No explanation.
+
+Extract the following from the insurance policy text:
+
+{{
+  "summary": "Explain the policy in 4-5 simple lines in plain English",
+  "key_benefits": ["List the main benefits clearly"],
+  "hidden_clauses": ["List important hidden or tricky clauses"],
+  "exclusions": ["List what is NOT covered"],
+  "risk_level": "Low or Medium or High based on overall risk"
+}}
+
+If any field is missing, return an empty list or "Unknown".
+Do not include markdown or extra text.
+
+Policy Text:
+{policy_text}"""
+
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
+
+        data = json.loads(response.text)
+        return data
+
+    except Exception:
+        return FAILSAFE
 
 
 # ---------------------------------------------------------------------------
@@ -339,12 +323,9 @@ def _merge_qualitative(merged: dict, new_data: dict) -> None:
 # ---------------------------------------------------------------------------
 def unified_analyze(text: str) -> dict:
     """
-    Chunked AI analysis of the policy text.
-    - Financial data extracted from the FIRST chunk (calculation logic unchanged).
-    - Qualitative insights (benefits, exclusions, hidden clauses) aggregated
-      across ALL chunks so no section is missed.
-    - On AI failure/quota error: falls back to regex extraction so fields
-      are never empty.
+    Single-call AI analysis of the policy text.
+    Makes ONLY ONE Gemini API call per request to prevent 429 errors.
+    Falls back to regex extraction on AI failure.
     """
     try:
         api_key = os.getenv("GEMINI_API_KEY")
@@ -354,31 +335,13 @@ def unified_analyze(text: str) -> dict:
 
         client = genai.Client(api_key=api_key)
 
-        # ---------------------------------------------------------------
-        # CHUNK STRATEGY: 5500-char chunks with 300-char overlap
-        # ---------------------------------------------------------------
-        CHUNK_SIZE = 5500
-        OVERLAP = 300
+        # Truncate text to reduce token usage and avoid chunked multi-calls
         clean_text = re.sub(r"\s+", " ", text).strip()
+        policy_text = clean_text[:8000]
 
-        chunks: list[str] = []
-        start = 0
-        while start < len(clean_text):
-            end = start + CHUNK_SIZE
-            chunks.append(clean_text[start:end])
-            if end >= len(clean_text):
-                break
-            start = end - OVERLAP
+        prompt = f"""You are an expert insurance analyst. Analyze the insurance policy text below and extract ALL requested data.
 
-        print(f"UNIFIED ANALYZE: {len(chunks)} chunk(s) to process")
-
-        # ---------------------------------------------------------------
-        # PASS 1: Full extraction on the FIRST chunk (financials + qualitative)
-        # ---------------------------------------------------------------
-        first_prompt = f"""
-You are an expert insurance analyst. Analyze the insurance policy text below and extract ALL requested data.
-
-IMPORTANT RULES — READ CAREFULLY:
+IMPORTANT RULES:
 - Do NOT return empty arrays for key_benefits, exclusions, or hidden_clauses.
 - If data is not explicitly labeled in the text, INFER from context.
 - Always extract at least 3-5 meaningful points per qualitative section.
@@ -399,148 +362,72 @@ QUALITATIVE FIELDS:
    - MAXIMUM 4-5 lines only. No more.
    - Use simple, everyday English. Zero legal jargon.
    - Do NOT copy any sentence from the policy text.
-   - Do NOT mention definitions, clause numbers, or policy wording.
-   - Explain these 4 things naturally:
-       a) What the policy offers (what it does for the buyer)
-       b) Type of plan (term / endowment / ULIP / savings)
-       c) The key benefit (life cover / maturity payout / income)
-       d) Overall usefulness (who should buy it and why)
+   - Explain: what the policy offers, type of plan, key benefit, overall usefulness.
    - Write as if explaining to a normal person, not a lawyer or agent.
 
-7. key_benefits — REQUIRED, minimum 3-5 items. Extract from:
-   - Financial protection provided
-   - Death benefit (sum assured or higher)
-   - Maturity / survival benefit
-   - Income payouts or cashback
-   - Premium waiver benefits
-   - Additional riders (accidental, critical illness, etc.)
-   - Tax benefits under 80C / 10(10D)
-   - Guaranteed vs non-guaranteed returns
-   If none are labeled, infer from the policy description.
+7. key_benefits — REQUIRED, minimum 3-5 items. Include death benefit, maturity benefit,
+   income payouts, premium waiver, riders, tax savings. Infer from context if not labeled.
 
-8. exclusions — REQUIRED, minimum 3-5 items. Extract from:
-   - Situations where the death/maturity benefit is NOT paid
-   - Medical non-disclosure or misrepresentation
-   - Suicide clause (typically within 1st year)
-   - Pre-existing conditions or waiting periods
-   - GST, charges, or deductions not refunded
-   - Hazardous activities or criminal acts
-   If none are labeled, infer from standard exclusion patterns for this policy type.
+8. exclusions — REQUIRED, minimum 3-5 items. Include situations where benefit is NOT paid:
+   medical non-disclosure, suicide clause, pre-existing conditions, GST/charges, hazardous activities.
+   Infer from standard patterns if not labeled.
 
-9. hidden_clauses — REQUIRED, minimum 3-5 items. Extract from:
-   - Conditional language: "subject to...", "only if...", "provided that..."
-   - Policy changes over time (e.g., benefit reductions after age 60)
-   - Surrender value below total premiums paid in early years
-   - Lock-in periods or revival conditions
-   - Non-guaranteed bonuses or market-linked charges
-   - Any dependency on age, term, or other variables
-   If none are labeled, infer from the policy structure and terms used.
+9. hidden_clauses — REQUIRED, minimum 3-5 items. Include conditional language, surrender value
+   limitations, lock-in periods, non-guaranteed bonuses, revival conditions.
+   Infer from policy structure if not labeled.
+
+Return a JSON object with these exact keys:
+premium, payment_term, policy_term, maturity_value, sum_assured,
+policy_summary, key_benefits, exclusions, hidden_clauses
 
 POLICY TEXT:
-{chunks[0]}
-        """
+{policy_text}"""
 
-        raw = _call_gemini_with_retry(
-            client,
+        response = client.models.generate_content(
             model="gemini-2.0-flash",
-            contents=first_prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=UnifiedAnalysis,
-            ),
+            contents=prompt,
         )
 
-        merged = json.loads(raw) if raw else {}
+        # Parse response
+        raw = response.text if response else ""
+        if not raw:
+            raise ValueError("Empty response from Gemini")
+
+        # Strip markdown fences if present
+        cleaned = re.sub(r"^```(?:json)?\s*", "", raw.strip())
+        cleaned = re.sub(r"\s*```\s*$", "", cleaned).strip()
+
+        # Try direct parse first
+        try:
+            result = json.loads(cleaned)
+        except json.JSONDecodeError:
+            # Fallback: extract JSON object from response
+            match = re.search(r"\{[\s\S]*\}", cleaned)
+            if match:
+                result = json.loads(match.group(0))
+            else:
+                raise ValueError("No valid JSON found in response")
 
         # Ensure list fields exist
         for f in ("key_benefits", "exclusions", "hidden_clauses"):
-            if f not in merged:
-                merged[f] = []
+            if f not in result or not isinstance(result[f], list):
+                result[f] = []
 
-        # ---------------------------------------------------------------
-        # PASS 2: Qualitative-only extraction on REMAINING chunks
-        # ---------------------------------------------------------------
-        class QualitativeOnly(BaseModel):
-            policy_summary: str = Field(description="1-2 sentence summary of this section.")
-            key_benefits: list[str] = Field(description="Benefits found in this section.")
-            exclusions: list[str] = Field(description="Exclusions found in this section.")
-            hidden_clauses: list[str] = Field(description="Hidden clauses in this section.")
-
-        for i, chunk in enumerate(chunks[1:], start=2):
-            try:
-                q_prompt = f"""
-You are an expert insurance analyst. This is part {i} of {len(chunks)} of an insurance policy document.
-Extract ONLY qualitative information from this section.
-
-IMPORTANT RULES:
-- Do NOT return empty arrays.
-- If data is not explicitly labeled, INFER from context.
-- Always extract at least 3 meaningful points per section where relevant content exists.
-- Keep each point under 20 words.
-- Return ONLY valid JSON — no text outside JSON.
-
-FIELDS TO EXTRACT:
-
-1. policy_summary — Write 1-2 clean, human-friendly sentences about what this section covers.
-   Use simple English. No legal jargon. No copying from text.
-
-2. key_benefits — Look for:
-   - Death benefit, maturity benefit, income payout, premium waiver
-   - Riders: accidental death, critical illness, disability
-   - Tax savings (80C / 10(10D)), guaranteed returns, bonuses
-   - Return empty list ONLY if this section has zero benefit-related content.
-
-3. exclusions — Look for:
-   - Situations where benefit is NOT paid
-   - Suicide clause, non-disclosure, pre-existing conditions
-   - Hazardous activities, criminal acts, waiting periods
-   - GST / charges not refunded
-   - Return empty list ONLY if this section has zero exclusion-related content.
-
-4. hidden_clauses — Look for:
-   - Conditional language: "subject to", "only if", "provided that"
-   - Surrender value limitations, lock-in periods, revival rules
-   - Benefit reductions tied to age or term
-   - Non-guaranteed bonus disclaimers
-   - Return empty list ONLY if this section has zero clause-related content.
-
-POLICY SECTION (Part {i} of {len(chunks)}):
-{chunk}
-                """
-
-                raw_q = _call_gemini_with_retry(
-                    client,
-                    model="gemini-2.0-flash",
-                    contents=q_prompt,
-                    config=types.GenerateContentConfig(
-                        response_mime_type="application/json",
-                        response_schema=QualitativeOnly,
-                    ),
-                )
-
-                if raw_q:
-                    chunk_data = json.loads(raw_q)
-                    _merge_qualitative(merged, chunk_data)
-
-            except Exception as chunk_err:
-                print(f"CHUNK {i} QUALITATIVE ERROR: {chunk_err}")
-                continue
-
-        # ---------------------------------------------------------------
-        # If AI returned empty qualitative fields, run regex fallback
-        # ---------------------------------------------------------------
-        if not merged.get("key_benefits") and not merged.get("exclusions"):
+        # If AI returned empty qualitative fields, supplement with regex fallback
+        if not result.get("key_benefits") and not result.get("exclusions"):
             print("UNIFIED ANALYZE: AI returned empty qualitative fields — running regex fallback")
             fallback = _regex_fallback(text)
-            _merge_qualitative(merged, fallback)
-            if not merged.get("policy_summary") or len(merged.get("policy_summary", "")) < 20:
-                merged["policy_summary"] = fallback["policy_summary"]
+            for f in ("key_benefits", "exclusions", "hidden_clauses"):
+                if not result.get(f):
+                    result[f] = fallback.get(f, [])
+            if not result.get("policy_summary") or len(result.get("policy_summary", "")) < 20:
+                result["policy_summary"] = fallback["policy_summary"]
 
         # Ensure premium_frequency is set (pipeline reads this)
-        if "premium_frequency" not in merged:
-            merged["premium_frequency"] = "yearly"
+        if "premium_frequency" not in result:
+            result["premium_frequency"] = "yearly"
 
-        return merged
+        return result
 
     except Exception as e:
         print(f"UNIFIED ANALYZE ERROR: {str(e)}")

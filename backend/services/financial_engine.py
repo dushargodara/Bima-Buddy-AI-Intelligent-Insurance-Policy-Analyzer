@@ -109,6 +109,48 @@ def calculate_inflation_adjusted_cagr(
 # ─────────────────────────────────────────────────────────────────────────────
 # IRR
 # ─────────────────────────────────────────────────────────────────────────────
+def calculate_irr_from_cashflows(cashflows: List[float]) -> Optional[float]:
+    """
+    IRR from a pre-built cashflows list.
+
+    Args:
+        cashflows: List of cash flows where outflows are negative and inflows positive.
+                   Example: [-premium] * policy_term + [maturity_value]
+
+    Returns:
+        IRR as percentage (e.g. 5.5 for 5.5%), or None if calculation fails.
+    """
+    try:
+        if not isinstance(cashflows, (list, tuple)) or len(cashflows) < 2:
+            logger.warning("IRR: invalid cashflows list")
+            return None
+
+        irr_raw = nf.irr(cashflows)
+
+        if (
+            irr_raw is None
+            or math.isnan(irr_raw)
+            or math.isinf(irr_raw)
+            or irr_raw <= -1
+        ):
+            logger.warning("IRR solver returned invalid value: %s", irr_raw)
+            return None
+
+        irr_pct = round(irr_raw * 100, 2)
+
+        if not (-5 <= irr_pct <= 30):
+            logger.warning(
+                "IRR out of plausible range (%.2f%%), discarding result", irr_pct
+            )
+            return None
+
+        return irr_pct
+
+    except Exception as exc:
+        logger.warning("IRR (cashflows) calculation failed: %s", exc)
+        return None
+
+
 def calculate_irr(
     premium: float,
     pay_years: int,
@@ -147,7 +189,7 @@ def calculate_irr(
             else round(_prem * 1.022, 2)
         )
 
-        # Build cashflows
+        # Build cashflows correctly — each element must be a float, not an int
         cashflows = [-_y1] + [-_prem] * max(_ppt - 1, 0)       # premium years
         waiting   = max(_term - _ppt - 1, 0)
         cashflows += [0.0] * waiting                             # waiting years

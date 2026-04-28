@@ -20,6 +20,7 @@ from backend.services.financial_engine import (
     calculate_inflation_adjusted_cagr,
     calculate_annualized_roi,
     calculate_irr,
+    calculate_irr_from_cashflows,
     calculate_tax_effective_irr,
     calculate_break_even_year,
     calculate_net_profit,
@@ -314,7 +315,13 @@ def process_policy(file_obj) -> dict[str, Any]:
         cagr = calculate_cagr(total_investment, mat_val, avg_time) if total_investment > 0 else 0
         infl_cagr = calculate_inflation_adjusted_cagr(cagr, INFLATION) if cagr else 0
         
-        irr = calculate_irr(annualized_premium, ppt_eval, term_eval, mat_val, first_year_premium if first_year_premium > annualized_premium else None)
+        # Build cashflows properly to avoid 'int not iterable' error
+        _ppt_irr = max(int(ppt_eval), 1)
+        _term_irr = max(int(term_eval), _ppt_irr)
+        cashflows = [-float(annualized_premium)] * _ppt_irr
+        cashflows += [0.0] * max(_term_irr - _ppt_irr - 1, 0)
+        cashflows.append(float(mat_val))
+        irr = calculate_irr_from_cashflows(cashflows)
         if irr is None: irr = cagr
         
         tax_irr = calculate_tax_effective_irr(annualized_premium, ppt_eval, term_eval, mat_val, TAX_RATE, SEC80C_LIMIT, first_year_premium if first_year_premium > annualized_premium else None)
